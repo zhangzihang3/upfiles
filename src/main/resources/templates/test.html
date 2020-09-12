@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+单文件上传：
+<form enctype="multipart/form-data" id="formData">
+    MultipartFile:<input type="file" name="file" id="fileName1"/><br>
+    <div id="progress">0%</div>
+    <input id="submit" placeholder="提交" type="button"/>
+</form>
+<script type="text/javascript" src="/jquery-3.4.1.js"></script>
+<script type="text/javascript">
+    (function () {
+        $("#submit").click(function () {
+            upFiles();
+        })
+
+        function upFiles() {
+            //不能这样写var a = $("#formData");
+            var a = document.getElementById("formData");
+            //封装成一个表单数据
+            var formData = new FormData(a);
+            $.ajax({
+                //后端接口
+                url: 'upFileOne',
+                //上传的文件
+                data: formData,
+                //响应返回的结果类型
+                datatype: 'json',
+                //下面俩个参数加上
+                processData: false,
+                contentType: false,
+                //异步请求才能显示进度
+                async: true,
+                //请求方式
+                type: 'POST',
+                //请求成功后的回调
+                success: function (renponse) {
+                    console.log("success" + renponse)
+                },
+                //请求失败后的回调
+                error: function (error) {
+                    console.log("error" + error)
+                },
+                //处理上传进度
+                xhr: function () {
+                    //ajax其实也就是对xhr的封装，这里自己设置底层的xhr
+                    var xhr = $.ajaxSettings.xhr();
+                    //给上传组件添加监听器 progress固定写法
+                    xhr.upload.addEventListener('progress', function (evt) {
+                        var loaded = evt.loaded;
+                        var total = evt.total;
+                        var percent = loaded / total * 100;
+                        //显示进度
+                        $('#progress').html(percent.toFixed(2) + "%");
+                        //toFixed小数位是2位
+                    }, false);
+                    return xhr;
+                }
+            })
+        }
+    })()
+</script>
+</body>
+</html>
